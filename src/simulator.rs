@@ -1,40 +1,86 @@
 use crate::creature::*;
-pub struct Simulator {
-    food: u32,
+use rand::prelude::SliceRandom;
+
+struct Square {
+    food: u8,
     prey: Vec<Creature>
 }
 
-impl Simulator {
-    pub fn new() -> Self {
+impl Square {
+    fn new() -> Self {
         Self {
-            food: 20,
-            prey: Vec::<Creature>::new()
+            food: 50,
+            prey: vec![]
         }
     }
 
-    pub fn run(&mut self) -> Genotype {
-        let mother = Creature::new(Genotype {
-            vision: [Allele::Dominant, Allele::Recessive]
-        });
+    pub fn run(&self) {
 
-        let father = Creature::new(Genotype {
-            vision: [Allele::Dominant, Allele::Recessive]
-        });
-
-        self.reproduce(mother, father)
     }
 
-    pub fn reproduce(&mut self, mother: Creature, father: Creature) -> Genotype {
-        let mother_gametes = mother.genes();
-        let father_gametes = father.genes();
+    pub fn reproduce(&mut self, mother: Creature, father: Creature) -> Creature {
+        let mother_genes = mother.genes();
+        let father_genes = father.genes();
         let genotype: Genotype;
 
         genotype = Genotype {
-            vision: [mother_gametes, father_gametes]
+            fur: [mother_genes[0].clone(), father_genes[0].clone()],
+            sex: [mother_genes[1].clone(), father_genes[1].clone()]
         };
 
         // self.prey.push(Creature::new(genotype));
         // println!("{:?}", genotype);
-        genotype
+        Creature::new(genotype)
+    }
+
+}
+
+pub struct Simulator {
+    board: Vec<Square>
+}
+
+impl Simulator {
+    pub fn new() -> Self {
+        let mut board = Vec::<Square>::new();
+
+        for _ in 0..40 {
+            board.push(Square::new());
+        }
+
+        Self {
+            board
+        }
+    }
+
+    pub fn run(&mut self, generations: u32) {
+        for _ in 0..=generations {
+            for square in &self.board {
+                square.run()
+            }
+
+            self.shuffe_board()
+        }
+    }
+
+    fn random_square(&mut self) -> &mut Square {
+        let mut random = rand::thread_rng();
+        self.board.choose_mut(&mut random).unwrap()
+    }
+
+    fn shuffe_board(&mut self) {
+        // get all organisms, reset all squares, and redistribute all organisms at random
+        let mut prey = Vec::<Creature>::new();
+
+        for square in &mut self.board {
+            for creature in &mut square.prey {
+                prey.push(*creature)
+            }
+
+            square.prey = vec![];
+        }
+
+        for creature in prey {
+            self.random_square().prey.push(creature);
+        }
     }
 }
