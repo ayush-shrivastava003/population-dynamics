@@ -4,5 +4,5 @@ use population_dynamics::*;
 
 fn main() {
     let mut sim = simulator::Simulator::new();
-    sim.run(10000);
+    sim.run(1000);
 }

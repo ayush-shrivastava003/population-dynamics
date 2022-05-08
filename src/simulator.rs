@@ -113,11 +113,18 @@ impl Simulator {
         println!("=======\nRESULTS\n=======\n");
         let mut males = 0;
         let mut females = 0;
+
         let mut black = 0;
         let mut white = 0;
         let mut gray = 0;
+
         let mut strong = 0;
         let mut weak = 0;
+
+        let mut strong_male = 0;
+        let mut weak_male = 0;
+        let mut strong_female = 0;
+        let mut weak_female = 0;
 
         let all = self.collect_prey();
         let all_num = all.len() as f32;
@@ -135,8 +142,20 @@ impl Simulator {
             }
 
             match creature.foraging {
-                ForagingAbility::Strong => strong += 1,
-                ForagingAbility::Weak => weak += 1
+                ForagingAbility::Strong => {
+                    strong += 1;
+                    match creature.sex {
+                        Sex::Male => strong_male += 1,
+                        _ => strong_female += 1
+                    }
+                },
+                ForagingAbility::Weak => {
+                    weak += 1;
+                    match creature.sex {
+                        Sex::Male => weak_male += 1,
+                        _ => weak_female += 1
+                    }
+                }
             }
         }
 
@@ -168,6 +187,31 @@ impl Simulator {
             weak,
             (weak as f32 / all_num) * 100.0
         );
+
+        println!("\n Dihybrid Foraging x Sex:"); 
+        /*
+        Testing if Foraging vs. Sex results in a 9:3:3:1 ratio, but it clearly looks like it doesn't with the current settings:
+            367 (55.521935%) strong male : 40 (6.0514374%) weak male : 247 (37.367622%) strong female : 7 (1.0590014%) weak female
+        It's defnitely to a significant bias for a strong foraging ability (obv - the probabilities for survival/reproduction are way worse if ur foraging sucks)
+        Additionally, sex is not really something that matters right now. It's defnitely possible that the numbers will get even more skewed once
+        females require more food during pregnancy.
+
+        After making the foraging ability redundant (both variants had the same chances of survival/reproduction), the dihybrid comes a lot closer
+        to the expected ratio, which is really exciting.
+            393 (59.00901%) strong male : 83 (12.462462%) weak male : 153 (22.972973%) strong female : 37 (5.555556%) weak female
+        I'm too lazy to do a chi-square test to see if the numbers match, but they generally seem to be close enough to the expected percentages.
+        */
+        println!(
+            "{} ({}%) strong male : {} ({}%) weak male : {} ({}%) strong female : {} ({}%) weak female",
+            strong_male,
+            (strong_male as f32 / all_num) * 100.0,
+            weak_male,
+            (weak_male as f32 / all_num) * 100.0,
+            strong_female,
+            (strong_female as f32 / all_num) * 100.0,
+            weak_female,
+            (weak_female as f32 / all_num) * 100.0,
+        )
     }
 
     #[allow(unused_variables)]
