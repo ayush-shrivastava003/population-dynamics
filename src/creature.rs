@@ -50,8 +50,7 @@ pub struct Creature {
     pub fur: Fur,
     pub sex: Sex,
     pub foraging: ForagingAbility,
-
-    // remaining_life: u8
+    pub dies_in: u8
 }
 
 impl Creature {
@@ -80,7 +79,7 @@ impl Creature {
             ForagingAbility::Weak
         };
 
-        Self {genotype, fur, sex, foraging, food_eaten: 0}
+        Self {genotype, fur, sex, foraging, food_eaten: 0, dies_in: 5}
     }
 
     pub fn genes(&self) -> Vec<Allele> {
@@ -100,15 +99,15 @@ impl Creature {
     pub fn reproduce(mother: &Creature, father: &Creature) -> Creature {
         let mother_genes = mother.genes();
         let father_genes = father.genes();
-        let genotype: Genotype;
-
-        genotype = Genotype {
+        let genotype = Genotype {
             fur: [mother_genes[0].clone(), father_genes[0].clone()],
             sex: [mother_genes[1].clone(), father_genes[1].clone()],
             foraging: [mother_genes[2].clone(), father_genes[2].clone()]
         };
 
-        Creature::new(genotype)
+        let child = Creature::new(genotype);
+        // println!("{} and {} produced {}", mother, father, child);
+        child
     }
 
 }

@@ -1,5 +1,6 @@
 use crate::creature::*;
 use rand::{prelude::SliceRandom, Rng};
+use std::time::Instant;
 
 #[derive(Debug)]
 pub struct Square {
@@ -10,7 +11,7 @@ pub struct Square {
 impl Square {
     fn new() -> Self {
         Self {
-            food: 50,
+            food: 250,
             prey: vec![]
         }
     }
@@ -77,7 +78,19 @@ impl Square {
                 let mates = self.get_mates();
                 if mates.len() > 0 {
                     let mate = mates.choose(&mut randomizer).unwrap();
-                    children.push(Creature::reproduce(mate, creature));
+                    let mate_chance = randomizer.gen_range(1..=10);
+                    // println!("Mate chance: {}", mate_chance);
+                    match creature.fur {
+                        Fur::Black => if mate_chance <= 8 {
+                            children.push(Creature::reproduce(mate, creature))
+                        },
+                        Fur::Gray => if mate_chance <= 5 {
+                            children.push(Creature::reproduce(mate, creature));
+                        }
+                        _ => if mate_chance == 1 {
+                            children.push(Creature::reproduce(mate, creature));
+                        }
+                    }
                 }
 
             }
@@ -98,9 +111,22 @@ impl Simulator {
             let mut square = Square::new();
             square.prey.push(Creature::new(
                 Genotype {
-                    fur: [rand::random(), rand::random()],
-                    sex: [rand::random(), rand::random()],
-                    foraging: [rand::random(), rand::random()]
+                    fur: [Allele::Dominant, Allele::Dominant],
+                    sex: [Allele::Dominant, Allele::Recessive],
+                    foraging: [Allele::Dominant, Allele::Recessive]
+                    // fur: [rand::random(), rand::random()],
+                    // sex: [rand::random(), rand::random()],
+                    // foraging: [rand::random(), rand::random()]
+            }));
+
+            square.prey.push(Creature::new(
+                Genotype {
+                    fur: [Allele::Recessive, Allele::Recessive],
+                    sex: [Allele::Recessive, Allele::Recessive],
+                    foraging: [Allele::Dominant, Allele::Recessive]
+                    // fur: [rand::random(), rand::random()],
+                    // sex: [rand::random(), rand::random()],
+                    // foraging: [rand::random(), rand::random()]
             }));
 
             board.push(square);
@@ -188,7 +214,7 @@ impl Simulator {
             (weak as f32 / all_num) * 100.0
         );
 
-        println!("\n Dihybrid Foraging x Sex:"); 
+        println!("\nDihybrid Foraging x Sex:"); 
         /*
         Testing if Foraging vs. Sex results in a 9:3:3:1 ratio, but it clearly looks like it doesn't with the current settings:
             367 (55.521935%) strong male : 40 (6.0514374%) weak male : 247 (37.367622%) strong female : 7 (1.0590014%) weak female
@@ -214,24 +240,19 @@ impl Simulator {
         )
     }
 
-    #[allow(unused_variables)]
     pub fn run(&mut self, generations: u32) {
-        self.stats();
+        // self.stats();
+        let start = Instant::now();
         for gen in 0..=generations {
-            println!("generation {}", gen);
-
             for square in &mut self.board {
-                square.run()
+                square.run();
             }
-
-            // print!("\r");
-            // print!("{}[2KStatus: shuffling board...", 27 as char);
-            // println!("Population: {:?}", self.shuffe_board());
+            println!("Generation: {} - {:?}", gen, self.shuffle_board());
             self.shuffle_board();
-            // println!("Completed generation {} in {} seconds", gen, start.elapsed().as_secs_f32());
         }
         println!();
         self.stats();
+        println!("\nFinished in {} seconds", start.elapsed().as_secs_f32());
     }
 
     fn random_square(&mut self) -> &mut Square {
@@ -244,7 +265,7 @@ impl Simulator {
         
         for square in &mut self.board {
             for creature in &square.prey {
-                if creature.food_eaten > 0 {
+                if creature.food_eaten > 0 && creature.dies_in > 0 {
                     prey.push(*creature);
                 }
             }
@@ -260,7 +281,11 @@ impl Simulator {
         
         for mut creature in prey {
             creature.food_eaten = 0;
-            self.random_square().prey.push(creature);
+            creature.dies_in -= 1;
+
+            let mut square = self.random_square();
+            square.food = 250;
+            square.prey.push(creature);
         }
 
         prey_len
