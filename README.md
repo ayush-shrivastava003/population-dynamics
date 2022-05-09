@@ -33,3 +33,5 @@ WIP population simulator loosely based off of [this](https://github.com/henry-la
 * A predator species is definitely going to be implemented at some point (that is the eventual goal, hence the repo name "population-dynamics"), but the way they interact with the prey might change. There might be a speed gene which will increase their chances of finding prey.
 
 * An energy system should be implemented. There's currently no cost to having black fur, or being good at foraging. Perhaps those abilities require more energy than their opposites. Making those extremely helpful attributes come at a cost may at least slow the directional selection.
+
+    - Additionally, I could instead make predators have better chances of catching prey when they have black fur or have strong foraging. This could actually make white rabbits the most common. Currently, the ratios are equal - 33% black : 33% gray : 33% white. It is possible that this system could make black and gray rabbits could make white rabbits more populous.

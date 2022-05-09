@@ -1,6 +1,6 @@
 use crate::creature::*;
 use rand::{prelude::SliceRandom, Rng};
-use std::time::Instant;
+use std::{time::Instant, io::{stdout, Write}};
 
 #[derive(Debug)]
 pub struct Square {
@@ -240,15 +240,26 @@ impl Simulator {
         )
     }
 
-    pub fn run(&mut self, generations: u32) {
+    pub fn run(&mut self, generations: usize) {
         // self.stats();
         let start = Instant::now();
+        let scale = 100.0 / generations as f32;
+
         for gen in 0..=generations {
             for square in &mut self.board {
                 square.run();
             }
-            println!("Generation: {} - {:?}", gen, self.shuffle_board());
-            self.shuffle_board();
+
+            let gen_scale = (gen as f32 * scale) as usize;
+            print!(
+                "\r\x1b[2KGen. {}/{} - {} [{}{}]",
+                gen,
+                generations,
+                self.shuffle_board(),
+                "#".repeat(gen_scale),
+                " ".repeat(100-gen_scale)
+            );
+            stdout().flush().unwrap();
         }
         println!();
         self.stats();
