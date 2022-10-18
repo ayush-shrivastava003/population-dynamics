@@ -37,15 +37,15 @@ pub enum ForagingAbility {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct Genotype {
+pub struct PreyGenotype {
     pub fur: [Allele; 2],
     pub sex: [Allele; 2],
     pub foraging: [Allele; 2] // the ability for a creature to find food
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct Creature {
-    pub genotype: Genotype,
+pub struct Prey {
+    pub genotype: PreyGenotype,
     pub food_eaten: u8,
     pub fur: Fur,
     pub sex: Sex,
@@ -53,8 +53,8 @@ pub struct Creature {
     pub dies_in: u8
 }
 
-impl Creature {
-    pub fn new(genotype: Genotype) -> Self {
+impl Prey {
+    pub fn new(genotype: PreyGenotype) -> Self {
         let fur = if matches!(genotype.fur[0], Allele::Dominant) {
             if matches!(genotype.fur[1], Allele::Dominant) {
                 Fur::Black
@@ -96,23 +96,23 @@ impl Creature {
         choices
     }
 
-    pub fn reproduce(mother: &Creature, father: &Creature) -> Creature {
+    pub fn reproduce(mother: &Prey, father: &Prey) -> Prey {
         let mother_genes = mother.genes();
         let father_genes = father.genes();
-        let genotype = Genotype {
+        let genotype = PreyGenotype {
             fur: [mother_genes[0].clone(), father_genes[0].clone()],
             sex: [mother_genes[1].clone(), father_genes[1].clone()],
             foraging: [mother_genes[2].clone(), father_genes[2].clone()]
         };
 
-        let child = Creature::new(genotype);
+        let child = Prey::new(genotype);
         // println!("{} and {} produced {}", mother, father, child);
         child
     }
 
 }
 
-impl fmt::Display for Creature {
+impl fmt::Display for Prey {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?} {:?}", self.fur, self.sex)
     }

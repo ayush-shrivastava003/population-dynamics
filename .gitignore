@@ -1,1 +1,3 @@
-/target
+py/plots/
+py/__pycache__/
+py/pop.xlsx
