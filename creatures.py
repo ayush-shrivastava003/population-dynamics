@@ -24,7 +24,7 @@ class Creature():
         for s in self.genome[:6]: # trait gene
             trait += self.base_system[s]
 
-        hunger_cost = trait / 12 # max for trait is 24 -> 24 / 12 = 2 (max hunger, i.e will kill creature)
+        hunger_cost = trait / 100 # max for trait is 24 -> 24 / 12 = 2 (max hunger, i.e will kill creature)
 
         return trait, sex, hunger_cost
 
